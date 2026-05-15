@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3002'
+const WS_BASE = API_BASE.replace(/^http/, 'ws')
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -276,13 +277,24 @@ export default function JukeboxApp() {
     }
   }, [])
 
-  // Initial load + polling for now playing every 10s
+  // Initial load + polling for now playing every 15s
   useEffect(() => {
     fetchNowPlaying()
     fetchQueue()
-    const interval = setInterval(fetchNowPlaying, 10_000)
+    const interval = setInterval(fetchNowPlaying, 15_000)
     return () => clearInterval(interval)
   }, [fetchNowPlaying, fetchQueue])
+
+  // WebSocket: re-fetch queue whenever any client adds a song
+  useEffect(() => {
+    const ws = new WebSocket(`${WS_BASE}/juke/ws`)
+    ws.onmessage = (event) => {
+      if (event.data === 'queue_updated') {
+        fetchQueue()
+      }
+    }
+    return () => ws.close()
+  }, [fetchQueue])
 
   // Debounced search
   useEffect(() => {
