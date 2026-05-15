@@ -277,14 +277,14 @@ export default function JukeboxApp() {
     }
   }, [])
 
-  // Initial load + polling every 15s
+  // Initial load + poll every 30s to catch skips or external changes
   useEffect(() => {
     fetchNowPlaying()
     fetchQueue()
     const interval = setInterval(() => {
       fetchNowPlaying()
       fetchQueue()
-    }, 15_000)
+    }, 30_000)
     return () => clearInterval(interval)
   }, [fetchNowPlaying, fetchQueue])
 
@@ -339,6 +339,14 @@ export default function JukeboxApp() {
     }
   }, [searchQuery])
 
+  const handleSongEnd = useCallback(() => {
+    // Brief delay so Spotify's API reflects the new track before we query
+    setTimeout(() => {
+      fetchNowPlaying()
+      fetchQueue()
+    }, 1500)
+  }, [fetchNowPlaying, fetchQueue])
+
   const handleAdd = useCallback(
     async (uri: string) => {
       setAddingUri(uri)
@@ -371,7 +379,7 @@ export default function JukeboxApp() {
 
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-6 flex flex-col gap-6">
         {/* Now Playing */}
-        <NowPlaying track={nowPlaying} onSongEnd={fetchNowPlaying} />
+        <NowPlaying track={nowPlaying} onSongEnd={handleSongEnd} />
 
         {/* Search */}
         <section className="rounded-2xl bg-zinc-900 p-6">
