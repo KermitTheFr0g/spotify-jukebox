@@ -288,6 +288,18 @@ export default function JukeboxApp() {
     return () => clearInterval(interval)
   }, [fetchNowPlaying, fetchQueue])
 
+  // Refresh on tab focus/re-open
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNowPlaying()
+        fetchQueue()
+      }
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [fetchNowPlaying, fetchQueue])
+
   // WebSocket: re-fetch queue whenever any client adds a song
   useEffect(() => {
     const ws = new WebSocket(`${WS_BASE}/juke/ws`)
