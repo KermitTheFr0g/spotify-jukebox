@@ -25,6 +25,11 @@ async def view_queue():
     return {"queue": current_queue}
 
 @router.post("/queue")
-async def add_to_queue(song_id: str):
-    if not song_id:
-        return 400, {"error", "No song ID passed"}
+async def add_to_queue(song_uri: str):
+    if not song_uri:
+        raise HTTPException(status_code=400, detail="No song URI provided")
+    status_code = spotify_service.add_to_queue(song_uri)
+    if status_code != 200:
+        raise HTTPException(status_code=status_code, detail="Failed to add song to queue")
+    return {"message": "Song added to queue"}
+

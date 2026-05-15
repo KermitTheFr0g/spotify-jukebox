@@ -1,5 +1,4 @@
 import os
-from urllib.parse import quote
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -17,12 +16,11 @@ class SpotifyService:
         self.refresh_token = None
         self.access_token = None
 
-    def spotify_get(self, endpoint: str):
+    def spotify_get(self, endpoint: str, params: dict = None):
         response = requests.get(
             url=f"{SPOTIFY_API_BASE_URL}{endpoint}",
-            headers={
-                "Authorization": f"Bearer {self.access_token}"
-            }
+            headers={"Authorization": f"Bearer {self.access_token}"},
+            params=params,
         )
         print(response.status_code)
         
@@ -31,8 +29,13 @@ class SpotifyService:
         elif response.status_code == 401:
             pass
 
-    def spotify_post(self):
-        pass
+    def spotify_post(self, endpoint: str, params: dict = None):
+        response = requests.post(
+            url=f"{SPOTIFY_API_BASE_URL}{endpoint}",
+            headers={"Authorization": f"Bearer {self.access_token}"},
+            params=params,
+        )
+        return response.status_code
         
     @staticmethod
     def get_authenticate_url():
@@ -63,7 +66,7 @@ class SpotifyService:
         return True
 
     def search_songs(self, search: str):
-        response = self.spotify_get(f"/search?q={quote(search)}&type=track")
+        response = self.spotify_get("/search", params={"q": search, "type": "track"})
         
         songs = list()
         for track in response["tracks"]["items"]:
@@ -79,8 +82,14 @@ class SpotifyService:
             
         return songs
 
+    def get_current_user(self):
+        return self.spotify_get("/me")
+
     def get_current_playing(self):
         return self.spotify_get("/me/player/currently-playing")
 
     def get_current_queue(self):
-        return self.spotify_get("/me/player/queue")    
+        return self.spotify_get("/me/player/queue")
+    
+    def add_to_queue(self, song_uri: str):
+        return self.spotify_post("/me/player/queue", params={"uri": song_uri})
