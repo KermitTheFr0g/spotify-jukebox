@@ -277,11 +277,14 @@ export default function JukeboxApp() {
     }
   }, [])
 
-  // Initial load + polling for now playing every 15s
+  // Initial load + polling every 15s
   useEffect(() => {
     fetchNowPlaying()
     fetchQueue()
-    const interval = setInterval(fetchNowPlaying, 15_000)
+    const interval = setInterval(() => {
+      fetchNowPlaying()
+      fetchQueue()
+    }, 15_000)
     return () => clearInterval(interval)
   }, [fetchNowPlaying, fetchQueue])
 
