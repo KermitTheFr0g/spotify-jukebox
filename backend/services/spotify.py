@@ -8,7 +8,7 @@ load_dotenv()
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-CALLBACK_URL = "https://jukebox.project-prometheus.online/admin/callback"
+CALLBACK_URL = "https://swole-api.project-prometheus.online/admin/callback"
 SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1"
 
 class SpotifyService:
